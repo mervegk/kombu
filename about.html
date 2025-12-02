@@ -11,10 +11,10 @@
     href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Nanum+Myeongjo&display=swap"
     rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./assets/style.css">
+  <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 
-<body class="about-bg relative text-primary font-funnel p-2 min-h-screen">
+<body class="about-bg relative text-primary font-funnel p-2 h-screen">
   <div class="overlay"></div>
 
   <nav class="p-4">
@@ -22,7 +22,7 @@
       <ul class="flex items-center gap-4">
         <li><a href="./index.html">INDEX</a></li>
         <li><a href="#">ARTISTS</a></li>
-        <li><a href="#">GALLERY</a></li>
+        <li><a href="./gallery.html">GALLERY</a></li>
         <li><a href="#">[ABOUT]</a></li>
       </ul>
       <div class="font-nanum font-bold text-lg">Kombu</div>
@@ -30,17 +30,25 @@
     </div>
   </nav>
 
-  <main class="px-4 h-full">
-    <section class="container mx-auto text-center h-full flex items-center justify-center min-h-[70vh]">
+  <main class="px-4 h-full flex flex-col items-center justify-around">
+    <section class="container mx-auto text-center flex items-center justify-center">
       <h1 class="text-8xl leading-[0.8]">CULTURE <br> CREATIVITY <br> <span
           class="font-cormorant italic">&ARTISIANS</span></h1>
     </section>
+    <section>
+      <h3 class="text-center text-4xl">WE COLLECT, CARE FOR, AND INTERPRET <br> <span
+          class="font-cormorant italic">WORKS OF ART</span> ACROSS
+        TIME,CULTURES <br> GEOGRAPHIES, AND IDENTITIES, SENTERING <br> THE VISION OF <span
+          class="font-cormorant italic">ARISTS AND MAKERS</span></h3>
+    </section>
     <section class="flex justify-center items-center h-auto py-8">
-      <div class="bg-primary text-black p-4 rounded-full text-xl">&darr;</div>
+      <div class="bg-primary text-black py-4 px-6 rounded-full text-xl">
+        <p>&darr;</p>
+      </div>
     </section>
   </main>
 
-  <script src="./assets/tailwind-config.js"></script>
+  <script src="./assets/js/tailwind-config.js"></script>
 </body>
 
 </html>

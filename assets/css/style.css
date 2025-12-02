@@ -16,7 +16,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('../Old-Woman-Reading_Gerard-Dou.jpg');
+  background: url('./img/Old-Woman-Reading_Gerard-Dou.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   transform: scaleX(-1);
@@ -26,7 +26,7 @@
 
 .about-bg {
   inset: 0;
-  background: url('../Allegory-of-Fame_Gerard-de-Lairesse.jpg');
+  background: url('./img/Allegory-of-Fame_Gerard-de-Lairesse.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

@@ -2,7 +2,8 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        'primary': '#ede7ae'
+        'primary': '#ede7ae',
+        'secondary': '#efefed'
       },
       fontFamily: {
         'nanum': ['Nanum Myeongjo', 'serif'],
