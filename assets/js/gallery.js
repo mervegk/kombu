@@ -13,6 +13,7 @@ const displayItems = (item, index, active) => {
   const zIndex = getZindex([...$items], active)[index]
   item.style.setProperty('--zIndex', zIndex)
   item.style.setProperty('--active', (index - active) / $items.length)
+
 }
 
 const animate = () => {
@@ -26,6 +27,7 @@ animate()
 $items.forEach((item, i) => {
   item.addEventListener('click', () => {
     progress = (i / $items.length) * 100 + 10
+    item.style.scale = 2
     animate()
   })
 })

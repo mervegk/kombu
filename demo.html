@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      color: #fff;
+      font-family: 'Playfair Display', cursive;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
+
+    .menu {
+      overflow: hidden;
+      cursor: grab;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      height: 40vh;
+    }
+
+    .menu.is-dragging {
+      cursor: grabbing;
+    }
+
+    .menu--wrapper {
+      counter-reset: count;
+      display: flex;
+      position: absolute;
+      z-index: 1;
+      height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .menu--item {
+      counter-increment: count;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      width: 30vw;
+      height: 100%;
+      padding: 0 1.5vw;
+      overflow: visible;
+      transition: padding 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu--item.active {
+      z-index: 10;
+      padding: 0 4vw;
+    }
+
+    @media (max-width: 767px) {
+      .menu--item {
+        width: 40vw;
+        height: 40vw;
+      }
+
+      .menu--item.active {
+        padding: 0 3vw;
+      }
+    }
+
+    .menu--item:nth-child(n+10):before {
+      content: counter(count);
+    }
+
+    .menu--item figure {
+      position: absolute;
+      z-index: 1;
+      display: block;
+      user-select: none;
+      -webkit-appearance: none;
+      padding: 0;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: all;
+      transform-origin: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu--item.active figure {
+      transform: scale(1.2) !important;
+    }
+
+    .menu--item figure img {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      vertical-align: middle;
+      transform-origin: center;
+    }
+
+    .menu--item figure:before {
+      position: absolute;
+      z-index: 2;
+      bottom: 1vw;
+      left: 1vw;
+      display: inline-block;
+      content: "0" counter(count);
+      color: #ffffff;
+      font-size: 3vw;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .info-panel {
+      position: fixed;
+      bottom: -300px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      padding: 30px;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+      transition: bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+
+    .info-panel.active {
+      bottom: 0;
+    }
+
+    .info-panel h2 {
+      margin: 0 0 15px 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .info-panel p {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .info-panel .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: #000;
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .info-panel .close-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+      z-index: 99;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+</head>
+
+<body>
+  <div class="menu">
+    <div class="menu--wrapper">
+      <div class="menu--item" data-title="Coastal Sunset"
+        data-description="A breathtaking view of the sun setting over calm ocean waters, painting the sky in vibrant hues.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1595265677860-9a3168007dc0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Coastal Sunset" /></figure>
+      </div>
+
+      <div class="menu--item" data-title="Mountain Majesty"
+        data-description="Towering peaks reaching towards the clouds, showcasing nature's raw beauty and grandeur.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1594786118579-95ba90c801ec?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Mountain Majesty" /></figure>
+      </div>
+
+      <div class="menu--item" data-title="Forest Serenity"
+        data-description="A peaceful woodland scene where light filters through ancient trees, creating a magical atmosphere.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1509339022327-1e1e25360a41?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Forest Serenity" /></figure>
+      </div>
+
+      <div class="menu--item" data-title="Desert Dreams"
+        data-description="Endless sand dunes stretching to the horizon, shaped by wind and time into stunning formations.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1525417071002-5ee4e6bb44f7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Desert Dreams" /></figure>
+      </div>
+
+      <div class="menu--item" data-title="Urban Nights"
+        data-description="City lights illuminate the night sky, capturing the energy and pulse of metropolitan life.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1594072702031-f0e2a602dd2c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Urban Nights" /></figure>
+      </div>
+
+      <div class="menu--item" data-title="Tropical Paradise"
+        data-description="Crystal clear waters meet pristine beaches, creating the perfect escape to a tropical wonderland.">
+        <figure><img
+            src="https://images.unsplash.com/photo-1592989819277-a3aafa40c66a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="Tropical Paradise" /></figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay"></div>
+  <div class="info-panel">
+    <button class="close-btn">×</button>
+    <h2 id="info-title">Title</h2>
+    <p id="info-description">Description</p>
+  </div>
+
+  <script>
+    const $menu = document.querySelector('.menu')
+    const $items = document.querySelectorAll('.menu--item')
+    const $images = document.querySelectorAll('.menu--item img')
+    const $infoPanel = document.querySelector('.info-panel')
+    const $overlay = document.querySelector('.overlay')
+    const $closeBtn = document.querySelector('.close-btn')
+    const $infoTitle = document.getElementById('info-title')
+    const $infoDescription = document.getElementById('info-description')
+
+    let menuWidth = $menu.clientWidth
+    let itemWidth = $items[0].clientWidth
+    let wrapWidth = $items.length * itemWidth
+    let activeItem = null
+
+    let scrollSpeed = 0
+    let oldScrollY = 0
+    let scrollY = 0
+    let y = 0
+    const lerp = (v0, v1, t) => {
+      return v0 * (1 - t) + v1 * t
+    }
+
+    const dispose = (scroll) => {
+      gsap.set($items, {
+        x: (i) => {
+          return i * itemWidth + scroll
+        },
+        modifiers: {
+          x: (x, target) => {
+            const s = gsap.utils.wrap(-itemWidth, wrapWidth - itemWidth, parseInt(x))
+            return `${s}px`
+          }
+        }
+      })
+    }
+    dispose(0)
+
+    // Click handling
+    const handleItemClick = (e) => {
+      if (isDragging || Math.abs(scrollSpeed) > 1) return
+
+      const item = e.currentTarget.closest('.menu--item')
+
+      if (activeItem === item) {
+        closeInfo()
+        return
+      }
+
+      // Remove active class from previous item
+      if (activeItem) {
+        activeItem.classList.remove('active')
+      }
+
+      // Add active class to clicked item
+      item.classList.add('active')
+      activeItem = item
+
+      // Update info panel
+      $infoTitle.textContent = item.dataset.title
+      $infoDescription.textContent = item.dataset.description
+
+      // Show info panel and overlay
+      $infoPanel.classList.add('active')
+      $overlay.classList.add('active')
+    }
+
+    const closeInfo = () => {
+      if (activeItem) {
+        activeItem.classList.remove('active')
+        activeItem = null
+      }
+      $infoPanel.classList.remove('active')
+      $overlay.classList.remove('active')
+    }
+
+    // Add click listeners to all figures
+    $items.forEach(item => {
+      const figure = item.querySelector('figure')
+      figure.addEventListener('click', handleItemClick)
+    })
+
+    $closeBtn.addEventListener('click', closeInfo)
+    $overlay.addEventListener('click', closeInfo)
+
+    /*--------------------
+    Wheel
+    --------------------*/
+    const handleMouseWheel = (e) => {
+      scrollY -= e.deltaY * 0.9
+    }
+
+    /*--------------------
+    Touch
+    --------------------*/
+    let touchStart = 0
+    let touchX = 0
+    let isDragging = false
+    const handleTouchStart = (e) => {
+      touchStart = e.clientX || e.touches[0].clientX
+      isDragging = true
+      $menu.classList.add('is-dragging')
+    }
+    const handleTouchMove = (e) => {
+      if (!isDragging) return
+      touchX = e.clientX || e.touches[0].clientX
+      scrollY += (touchX - touchStart) * 2.5
+      touchStart = touchX
+    }
+    const handleTouchEnd = () => {
+      isDragging = false
+      $menu.classList.remove('is-dragging')
+    }
+
+    /*--------------------
+    Listeners
+    --------------------*/
+    $menu.addEventListener('mousewheel', handleMouseWheel)
+
+    $menu.addEventListener('touchstart', handleTouchStart)
+    $menu.addEventListener('touchmove', handleTouchMove)
+    $menu.addEventListener('touchend', handleTouchEnd)
+
+    $menu.addEventListener('mousedown', handleTouchStart)
+    $menu.addEventListener('mousemove', handleTouchMove)
+    $menu.addEventListener('mouseleave', handleTouchEnd)
+    $menu.addEventListener('mouseup', handleTouchEnd)
+
+    $menu.addEventListener('selectstart', () => { return false })
+
+    /*--------------------
+    Resize
+    --------------------*/
+    window.addEventListener('resize', () => {
+      menuWidth = $menu.clientWidth
+      itemWidth = $items[0].clientWidth
+      wrapWidth = $items.length * itemWidth
+    })
+
+    /*--------------------
+    Render
+    --------------------*/
+    const render = () => {
+      requestAnimationFrame(render)
+      y = lerp(y, scrollY, .1)
+      dispose(y)
+
+      scrollSpeed = y - oldScrollY
+      oldScrollY = y
+
+      gsap.to($items, {
+        skewX: -scrollSpeed * .2,
+        rotate: scrollSpeed * .01,
+        scale: 1 - Math.min(100, Math.abs(scrollSpeed)) * 0.003
+      })
+    }
+    render()
+  </script>
+</body>
+
+</html>

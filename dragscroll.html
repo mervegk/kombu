@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carousel — fixed</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      background: #ede7ae;
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .menu {
+      width: 100%;
+      max-width: 1200px;
+      height: 40vh;
+      position: relative;
+      overflow: visible;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .menu.is-dragging {
+      cursor: grabbing
+    }
+
+    .menu--wrapper {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .menu--item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30vw;
+      height: 100%;
+      padding: 0 1.5vw;
+      overflow: hidden;
+      pointer-events: auto;
+      transform-origin: center;
+      border-radius: 10px;
+    }
+
+    @media (max-width:767px) {
+      .menu--item {
+        width: 40vw;
+        height: 40vw
+      }
+    }
+
+    .menu--item figure {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .menu--item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+      transition: transform .28s cubic-bezier(.2, .9, .2, 1)
+    }
+
+    .menu--item[data-alt="small"] {
+      transform: scale(.88);
+    }
+
+    .menu--item[data-alt="big"] {
+      transform: scale(1);
+    }
+
+    .menu--item.is-active {
+      z-index: 5;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 100%;
+      transform: translateY(-50%);
+      background: rgba(20, 20, 20, 0.98);
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+      border-radius: 8px;
+      padding: 16px;
+      width: 280px;
+      max-width: 38vw;
+      pointer-events: auto;
+      opacity: 0;
+      transition: opacity .28s ease, transform .28s cubic-bezier(.2, .9, .2, 1);
+      z-index: 40;
+    }
+
+    .info-panel.show {
+      opacity: 1;
+      transform: translateY(0) translateX(0);
+    }
+
+    .info-panel h3 {
+      margin: 0 0 6px 0;
+      font-size: 1.05rem;
+    }
+
+    .info-panel p {
+      margin: 0;
+      font-size: .92rem;
+      color: #ddd;
+      line-height: 1.3
+    }
+
+    .info-panel .close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: .8;
+    }
+
+    @media (max-width:600px) {
+      .info-panel {
+        padding: 12px;
+        font-size: .95rem;
+      }
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      width: 300px;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      transform: translateX(-50%);
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #fff;
+      transition: width 0.2s linear;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="menu" id="menu">
+    <div class="menu--wrapper" id="wrap">
+      <div class="menu--item" data-title="1631-1632"
+        data-description="A breathtaking view of the sun setting over calm ocean waters, painting the sky in vibrant hues.">
+        <figure><img src="./assets/img/Old-Woman-Reading_Gerard-Dou.jpg" alt=""></figure>
+      </div>
+
+      <div class="menu--item" data-title="1635"
+        data-description="Towering peaks reaching towards the clouds, showcasing nature's raw beauty and grandeur.">
+        <figure><img src="./assets/img/Frans_Hals_Feyntje_van_Steenkiste.jpg" alt=""></figure>
+      </div>
+
+      <div class="menu--item" data-title="1628 "
+        data-description="A peaceful woodland scene where light filters through ancient trees, creating a magical atmosphere.">
+        <figure><img src="./assets/img/Hendrik_ter_Brugghen__Heraclitus.jpg" alt=""></figure>
+      </div>
+
+      <div class="menu--item" data-title="1645-1650"
+        data-description="An urban nightscape glowing with life and motion, neon reflections on wet pavements.">
+        <figure><img src="./assets/img/Meisje_met_brede_hoed_-Caesar_van_Everdingen.jpg" alt=""></figure>
+      </div>
+
+      <div class="menu--item" data-title="1628"
+        data-description="Rolling dunes under a wide sky, soft sand textures shaped by the wind.">
+        <figure><img src="./assets/img/Democritus_Rijksmuseum.jpeg" alt=""></figure>
+      </div>
+
+      <div class="menu--item" data-title="1839"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/willem-ii-jan-adam-kruseman.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1851"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/Twee_vrouwen_in_Italiaanse_dracht_Rijksmuseum.jpeg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1634 "
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/Jacob_Cats_by_Michiel_Jansz_van_Mierevelt.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1670"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/joan-reynst-lord-of-drakesteinkarel-dujardin.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1642"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/Bartholomeus_van_der_Helst_Gerard_Andriesz_Bicker.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1861"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water."
+        data-name="Jan Adam Kruseman">
+        <figure><img src="./assets/img/Salome_Jan Adam.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1645"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/Cydippe-with-the-Apple-of-Acontius.jpg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1850"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water.">
+        <figure><img src="./assets/img/Rodolphe_le_Chevalie_Maatschappij_Rijksmuseum.jpeg" alt=""></figure>
+      </div>
+      <div class="menu--item" data-title="1833"
+        data-description="Boats moored in a quiet harbor at dawn, gentle ripples on the water."
+        data-name="Jan Adam Kruseman">
+        <figure><img src="./assets/img/Alida_Christina_Assink_door_Jan_Adam_Kruseman.jpg" alt=""></figure>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel" id="infoPanel" aria-hidden="true">
+    <div class="close" id="panelClose">✕</div>
+    <h3 id="panelTitle">Title</h3>
+    <p id="panelDesc">Description</p>
+    <p id="panelName">Name</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+
+  <script>
+    (function () {
+      const $menu = document.getElementById('menu');
+      const $wrap = document.getElementById('wrap');
+      let $items = Array.from(document.querySelectorAll('.menu--item'));
+      const $info = document.getElementById('infoPanel');
+      const $title = document.getElementById('panelTitle');
+      const $desc = document.getElementById('panelDesc');
+      const $close = document.getElementById('panelClose');
+      const $name = document.getElementById('panelName');
+      const progressFill = document.querySelector('.progress-fill');
+
+      let menuWidth = $menu.clientWidth;
+      let itemWidth = $items[0].clientWidth;
+      let wrapWidth = $items.length * itemWidth;
+      let scrollY = 0, y = 0, oldY = 0, scrollSpeed = 0;
+      const lerp = (a, b, t) => a * (1 - t) + b * t;
+
+      // offsets stored as floats for smooth animation
+      const offsets = {};
+
+      const indexOfItem = el => $items.indexOf(el);
+
+      // dispose uses parseFloat so we keep fractional px
+      const dispose = (scroll) => {
+        gsap.set($items, {
+          x: (i) => {
+            const base = i * itemWidth + scroll;
+            const off = offsets[i] || 0;
+            return base + off;
+          },
+          modifiers: {
+            x: (x) => {
+              const s = gsap.utils.wrap(-itemWidth, wrapWidth - itemWidth, parseFloat(x));
+              return `${s}px`;
+            }
+          }
+        });
+      };
+
+      function measure() {
+        menuWidth = $menu.clientWidth;
+        itemWidth = $items[0].clientWidth;
+        wrapWidth = $items.length * itemWidth;
+      }
+      measure();
+
+      const handleWheel = (e) => { e.preventDefault(); scrollY -= e.deltaY * 0.9; hidePanel(); };
+      let isDragging = false, touchStart = 0, touchX = 0;
+      const handleDown = (e) => { const cx = e.clientX || (e.touches && e.touches[0].clientX); touchStart = cx; isDragging = true; $menu.classList.add('is-dragging'); };
+      const handleMove = (e) => { if (!isDragging) return; const cx = e.clientX || (e.touches && e.touches[0].clientX); scrollY += (cx - touchStart) * 2.5; touchStart = cx; };
+      const handleUp = () => { isDragging = false; $menu.classList.remove('is-dragging'); };
+
+      $menu.addEventListener('wheel', handleWheel, { passive: false });
+      $menu.addEventListener('touchstart', handleDown, { passive: true });
+      $menu.addEventListener('touchmove', handleMove, { passive: true });
+      $menu.addEventListener('touchend', handleUp);
+      $menu.addEventListener('mousedown', handleDown);
+      $menu.addEventListener('mousemove', handleMove);
+      $menu.addEventListener('mouseup', handleUp);
+      $menu.addEventListener('mouseleave', handleUp);
+      window.addEventListener('resize', () => { measure(); if ($info.classList.contains('show') && activeEl) positionPanel(activeEl); });
+
+      const updateProgress = () => {
+        // scrollY değerini 0 ile wrapWidth arasında normalize etme
+        let progress = ((y % wrapWidth) / wrapWidth);
+        if (progress < 0) progress += 1;
+
+        progressFill.style.width = (progress * 100) + "%";
+      };
+
+      const render = () => {
+        requestAnimationFrame(render);
+        y = lerp(y, scrollY, .1);
+        dispose(y);
+        scrollSpeed = y - oldY; oldY = y;
+
+        // only skew/rotate continuously (no scale)
+        gsap.to($items, {
+          skewX: -scrollSpeed * .2,
+          rotate: scrollSpeed * .01,
+          duration: 0.22,
+          ease: "power2.out"
+        });
+        updateProgress();
+      };
+      render();
+
+
+      // Focus/panel logic
+      let activeEl = null;
+      const focusGap = () => itemWidth * 0.12;
+      const panelWidthPx = () => Math.round(itemWidth * 0.5);
+
+      function clearOffsets() { for (const k in offsets) delete offsets[k]; }
+
+      function updateOffsetsForActive(activeIndex, progress = 1) {
+        clearOffsets();
+        if (activeIndex === null) return;
+        const gap = focusGap();
+        // we set float offsets (not rounded) and multiply by progress (0..1) for smoothness
+        offsets[activeIndex - 1] = - (gap / 2) * progress;
+        offsets[activeIndex + 1] = (gap / 2) * progress;
+        offsets[activeIndex - 2] = - (gap * 0.15) * progress;
+        offsets[activeIndex + 2] = (gap * 0.15) * progress;
+      }
+
+      function setActive(el) {
+        if (!el) return;
+        if (activeEl === el) { clearActive(); return; }
+        activeEl = el;
+        const idx = indexOfItem(el);
+
+        $items.forEach(i => i.classList.remove('is-active'));
+        el.classList.add('is-active');
+
+        // animate offsets smoothly via a proxy tween (float progress)
+        const temp = { p: 0 };
+        gsap.to(temp, {
+          p: 1,
+          duration: 0.32,
+          ease: "power2.out",
+          onUpdate: () => {
+            updateOffsetsForActive(idx, temp.p);
+            dispose(y);
+          }
+        });
+
+        // animate scales for active and others
+        $items.forEach((it, i) => {
+          const alt = it.getAttribute('data-alt') === 'small' ? 0.5 : 0.8;
+          if (it === el) {
+            gsap.to(it, { scale: 1.16, duration: 0.32, ease: "power2.out" });
+            const img = it.querySelector('img'); if (img) gsap.to(img, { scale: 1.06, duration: 0.32, ease: "power2.out" });
+          } else {
+            gsap.to(it, { scale: alt, duration: 0.32, ease: "power2.out" });
+            const img = it.querySelector('img'); if (img) gsap.to(img, { scale: 1, duration: 0.32, ease: "power2.out" });
+          }
+        });
+
+        // set panel content + show + position
+        $title.textContent = el.getAttribute('data-title') || "Untitled";
+        $desc.textContent = el.getAttribute('data-description') || "";
+        $name.textContent = el.getAttribute('data-name') || "";
+        positionPanel(el);
+        showPanel();
+      }
+
+      function clearActive() {
+        activeEl = null;
+        // animate offsets back to zero
+        const temp = { p: 1 };
+        gsap.to(temp, {
+          p: 0,
+          duration: 0.28,
+          ease: "power2.out",
+          onUpdate: () => {
+            updateOffsetsForActive(-999, temp.p); // pass invalid idx -> updateOffsetsForActive will early return but we still want progressive zeroing
+            // better: gradually shrink existing offsets
+            for (const k in offsets) offsets[k] = offsets[k] * temp.p;
+            dispose(y);
+          },
+          onComplete: () => { clearOffsets(); dispose(y); }
+        });
+
+        $items.forEach(it => {
+          it.classList.remove('is-active');
+          const alt = it.getAttribute('data-alt') === 'small' ? 0.88 : 1;
+          gsap.to(it, { scale: alt, duration: 0.28, ease: "power2.out" });
+          const img = it.querySelector('img'); if (img) gsap.to(img, { scale: 1, duration: 0.28, ease: "power2.out" });
+        });
+
+        hidePanel();
+      }
+
+      function showPanel() {
+        const w = panelWidthPx();
+        $info.style.width = w + 'px';
+        $info.classList.add('show');
+        $info.setAttribute('aria-hidden', 'false');
+      }
+      function hidePanel() {
+        $info.classList.remove('show');
+        $info.setAttribute('aria-hidden', 'true');
+      }
+
+      function positionPanel(el) {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const panelW = panelWidthPx();
+        const overlap = 50;
+
+        // Position at right bottom of the menu item
+        let left = rect.right - overlap;
+        const maxLeft = window.innerWidth - panelW - 12;
+        if (left > maxLeft) left = maxLeft;
+        if (left < 12) left = rect.right - overlap;
+
+        // Bottom align with the menu item
+        let top = rect.bottom - $info.offsetHeight;
+        const clampedTop = Math.max(12, Math.min(top, window.innerHeight - $info.offsetHeight - 12));
+
+        $info.style.left = left + 'px';
+        $info.style.top = clampedTop + 'px';
+      }
+
+      $items.forEach((it, i) => {
+        // ensure alternating baseline if not present
+        if (!it.hasAttribute('data-alt')) it.setAttribute('data-alt', (i % 2 === 0) ? 'big' : 'small');
+        gsap.set(it, { scale: it.getAttribute('data-alt') === 'small' ? 0.5 : 0.8 });
+        it.addEventListener('click', (ev) => { ev.stopPropagation(); setActive(it); });
+      });
+
+      document.addEventListener('click', (e) => { if ($info.contains(e.target)) return; if (!e.target.closest('.menu--item')) clearActive(); });
+      $close.addEventListener('click', (e) => { e.stopPropagation(); clearActive(); });
+
+      dispose(0); // initial placement
+
+      // ensure panel follows active during animation/resizes
+      function panelLoop() {
+        if ($info.classList.contains('show') && activeEl) positionPanel(activeEl);
+        requestAnimationFrame(panelLoop);
+      }
+      requestAnimationFrame(panelLoop);
+
+      // expose for debug
+      window._carouselFixed = { measure, dispose, setActive, clearActive, offsets };
+
+    })();
+  </script>
+</body>
+
+</html>
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Nanum+Myeongjo&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+
+<style>
+  body {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Funnel Sans', sans-serif;
+    background: #ede7ae;
+  }
+
+  .carousel {
+    width: 100%;
+    cursor: grab;
+  }
+
+  .carousel.dragging {
+    cursor: grabbing;
+  }
+
+  .carousel--wrap {
+    white-space: nowrap;
+  }
+
+  .carousel--item {
+    display: inline-block;
+    width: 30vw;
+    padding: 3vw;
+    user-select: none;
+  }
+
+
+  .carousel--item figure {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: 0;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+  }
+
+  .carousel--item figure img {
+    position: absolute;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    vertical-align: middle;
+    transform-origin: center;
+  }
+
+  .carousel--item {
+    transition: transform 0.4s ease;
+  }
+
+  .carousel--item h2 {
+    position: absolute;
+    z-index: 1;
+    bottom: 1vw;
+    font-size: 6vw;
+    color: #fff;
+  }
+
+  .carousel--progress {
+    position: fixed;
+    z-index: 2;
+    pointer-events: none;
+    bottom: 2vw;
+    width: 20vw;
+    left: 3vw;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .carousel--progress-bar {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    transform: scaleX(0);
+    transform-origin: 0% 0%;
+  }
+
+  .carousel--item:nth-child(odd) {
+    transform: scale(0.2);
+  }
+
+  .carousel--item:nth-child(even) {
+    transform: scale(1);
+  }
+
+  .carousel--item {
+    transition: transform .4s ease, margin .4s ease;
+  }
+
+  .carousel--item .info {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: .4s ease;
+    color: #fff;
+    font-size: 1.2vw;
+    pointer-events: none;
+  }
+
+  .carousel--item.active .info {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<body>
+  <div class="carousel">
+    <div class="carousel--wrap">
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1595265677860-9a3168007dc0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>South</h2>
+        <div class="info">Lorem ipsum bla bla.</div>
+
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1594786118579-95ba90c801ec?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Troker</h2>
+        <div class="info">Lorem ipsum.</div>
+
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1509339022327-1e1e25360a41?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Slant</h2>
+        <div class="info">Lorem ipsum bla bla.</div>
+
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1525417071002-5ee4e6bb44f7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Gravy</h2>
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1594072702031-f0e2a602dd2c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Amuse</h2>
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1592989819277-a3aafa40c66a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Truffle</h2>
+      </div>
+
+      <div class="carousel--item">
+        <figure><img
+            src="https://images.unsplash.com/photo-1548374797-d13fd5d2b2a8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
+            alt="" /></figure>
+        <h2>Locker</h2>
+      </div>
+
+    </div>
+    <div class="carousel--progress">
+      <div class="carousel--progress-bar"></div>
+    </div>
+  </div>
+</body>
+
+
+<script>
+  const lerp = (f0, f1, t) => (1 - t) * f0 + t * f1
+  const clamp = (val, min, max) => Math.max(min, Math.min(val, max))
+
+  class DragScroll {
+    constructor(obj) {
+      this.$el = document.querySelector(obj.el)
+      this.$wrap = this.$el.querySelector(obj.wrap)
+      this.$items = this.$el.querySelectorAll(obj.item)
+      this.$bar = this.$el.querySelector(obj.bar)
+      this.init()
+    }
+
+    init() {
+      this.progress = 0
+      this.speed = 0
+      this.oldX = 0
+      this.x = 0
+      this.playrate = 0
+      this.selectedItems = null
+      //
+      this.bindings()
+      this.events()
+      this.calculate()
+      this.raf()
+    }
+
+    bindings() {
+      [
+        'events',
+        'calculate',
+        'raf',
+        'handleWheel',
+        'move',
+        'raf',
+        'handleTouchStart',
+        'handleTouchMove',
+        'handleTouchEnd'
+      ].forEach(i => { this[i] = this[i].bind(this) })
+    }
+
+    calculate() {
+      this.progress = 0
+      this.wrapWidth = this.$items[0].clientWidth * this.$items.length
+      this.$wrap.style.width = `${this.wrapWidth}px`
+      this.maxScroll = this.wrapWidth - this.$el.clientWidth
+    }
+
+    handleWheel(e) {
+      this.progress += e.deltaY
+      this.move()
+    }
+
+    handleTouchStart(e) {
+      e.preventDefault()
+      this.dragging = true
+      this.startX = e.clientX || e.touches[0].clientX
+      this.$el.classList.add('dragging')
+    }
+
+    handleTouchMove(e) {
+      if (!this.dragging) return false
+      const x = e.clientX || e.touches[0].clientX
+      this.progress += (this.startX - x) * 2.5
+      this.startX = x
+      this.move()
+    }
+
+    handleTouchEnd() {
+      this.dragging = false
+      this.$el.classList.remove('dragging')
+    }
+
+    move() {
+      this.progress = clamp(this.progress, 0, this.maxScroll)
+    }
+
+    events() {
+      window.addEventListener('resize', this.calculate)
+      window.addEventListener('wheel', this.handleWheel)
+      //
+      this.$el.addEventListener('touchstart', this.handleTouchStart)
+      window.addEventListener('touchmove', this.handleTouchMove)
+      window.addEventListener('touchend', this.handleTouchEnd)
+      //
+      window.addEventListener('mousedown', this.handleTouchStart)
+      window.addEventListener('mousemove', this.handleTouchMove)
+      window.addEventListener('mouseup', this.handleTouchEnd)
+      document.body.addEventListener('mouseleave', this.handleTouchEnd)
+
+      this.$items.forEach(item => {
+        item.addEventListener('click', () => {
+          this.selectedItem = item
+          this.$items.forEach(i => i.classList.remove("active"));
+          item.classList.add("active");
+        })
+      })
+    }
+
+    raf() {
+      // requestAnimationFrame(this.raf)
+      this.x = lerp(this.x, this.progress, 0.1)
+      this.playrate = this.x / this.maxScroll
+      //
+      this.$wrap.style.transform = `translateX(${-this.x}px)`
+      this.$bar.style.transform = `scaleX(${.18 + this.playrate * .82})`
+      //
+      this.speed = Math.min(100, this.oldX - this.x)
+      this.oldX = this.x
+      //
+      this.scale = lerp(this.scale, this.speed, 0.1)
+      this.$items.forEach((i, index) => {
+        const baseScale = 1 - Math.abs(this.speed) * 0.002;
+        const imgScaleX = 1 + Math.abs(this.speed) * 0.004;
+
+        // Başlangıç "bir büyük bir küçük" dizilim
+        const altScale = (index % 2 === 0) ? 0.9 : 1;
+
+        // Eğer bu tıklanan item ise
+        if (i === this.selectedItem) {
+          i.style.transform = `scale(${altScale + 0.3})`;
+          i.querySelector('img').style.transform = `scale(1.05)`;
+
+          // YANDİKİ item’lara yer aç
+          const prev = this.$items[index - 1];
+          const next = this.$items[index + 1];
+
+          if (prev) prev.style.marginRight = "4vw";
+          if (next) next.style.marginLeft = "4vw";
+
+        } else {
+          // Tıklanmamış item: normal + scroll animasyonu
+          i.style.transform = `scale(${altScale})`;
+          i.querySelector('img').style.transform = `scaleX(${imgScaleX})`;
+
+          // margin’leri resetle
+          i.style.marginLeft = "0";
+          i.style.marginRight = "0";
+        }
+      });
+
+
+    }
+  }
+
+
+  /*--------------------
+  Instances
+  --------------------*/
+  const scroll = new DragScroll({
+    el: '.carousel',
+    wrap: '.carousel--wrap',
+    item: '.carousel--item',
+    bar: '.carousel--progress-bar',
+  })
+
+
+  /*--------------------
+  One raf to rule em all
+  --------------------*/
+  const raf = () => {
+    requestAnimationFrame(raf)
+    scroll.raf()
+  }
+  raf()
+</script>
+
+</html> -->

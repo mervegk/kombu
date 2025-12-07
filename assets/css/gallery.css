@@ -20,7 +20,7 @@
       --y: 0;
       --rot: calc(var(--active) * 120deg);
       --opacity: calc(var(--zIndex) / var(--items) * 3 - 2);
-      --scale: 1;
+      --scale: 1.2;
       overflow: hidden;
       position: absolute;
       z-index: var(--zIndex);
